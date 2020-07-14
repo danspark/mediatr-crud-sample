@@ -1,6 +1,6 @@
-using MediatR.Pipeline;
 using MediatR.Sample.Core.Behaviors;
 using MediatR.Sample.Core.Commands;
+using MediatR.Sample.Core.Infrastructure;
 using MediatR.Sample.Core.Persistence;
 using MediatR.Sample.Core.Queries;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace MediatR.Sample
@@ -33,12 +34,15 @@ namespace MediatR.Sample
             AddLogging(services);
 
             services.AddControllers();
+
+            services.AddSingleton<DomainEventPublisher>();
         }
 
         private static void AddLogging(IServiceCollection services)
         {
             services.AddLogging(builder =>
-                builder.AddSerilog(dispose: true));
+                builder.AddSerilog(dispose: true)
+                    .AddConsole());
         }
 
         private static void AddPersistence(IServiceCollection services)
@@ -56,13 +60,15 @@ namespace MediatR.Sample
             services.AddScoped(typeof(IRequestHandler<,>), typeof(ReadEntityQuery<>.Handler));
             services.AddScoped(typeof(IRequestHandler<,>), typeof(UpdateEntityCommand<>.Handler));
             services.AddScoped(typeof(IRequestHandler<,>), typeof(DeleteEntityCommand<>.Handler));
-
             services.AddScoped(typeof(IRequestHandler<,>), typeof(ListEntitiesQuery<>.Handler));
-
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(TransactionalBehavior<,>));
-            services.AddScoped(typeof(IRequestPreProcessor<>), typeof(PreProcessorLoggingBehavior<>));
-            services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(PostProcessorLoggingBehavior<,>));
-            services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(NullEntityFilter<,>));
+
+            //reminder: this is automatically registered by the library: https://github.com/jbogard/MediatR/issues/453
+            //services.AddScoped(typeof(IRequestPreProcessor<>), typeof(PreProcessorLoggingBehavior<>));
+            //services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(PostProcessorLoggingBehavior<,>));
+            //services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(NullEntityFilter<,>));
+            //services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(PublishCreationEventBehavior<,>));
+            //services.AddScoped(typeof(INotificationHandler<>), typeof(EntityCreationNotificator<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
