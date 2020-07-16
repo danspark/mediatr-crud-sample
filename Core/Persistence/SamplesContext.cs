@@ -16,6 +16,16 @@ namespace MediatR.Sample.Core.Persistence
             modelBuilder.Entity<Category>()
                 .HasKey(c => c.Id);
 
+            modelBuilder.Entity<Product>(cfg =>
+            {
+                cfg.HasKey(p => p.Id);
+
+                cfg.HasOne<Category>()
+                    .WithMany()
+                    .HasForeignKey(p => p.CategoryId)
+                    .IsRequired(false);
+            });
+
             base.OnModelCreating(modelBuilder);
         }
     }

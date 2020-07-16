@@ -24,7 +24,14 @@ namespace MediatR.Sample.Controllers
         [HttpPost]
         public virtual async Task<ActionResult<T>> Create([FromBody] T entity, CancellationToken cancellationToken)
         {
-            return await _mediator.Send(new CreateEntityCommand<T>(entity), cancellationToken);
+            try
+            {
+                return await _mediator.Send(new CreateEntityCommand<T>(entity), cancellationToken);
+            }
+            catch (EntityNotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         [HttpGet("{id}")]
