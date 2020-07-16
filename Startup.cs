@@ -1,5 +1,6 @@
 using MediatR.Sample.Core.Behaviors;
 using MediatR.Sample.Core.Commands;
+using MediatR.Sample.Core.Commands.Sample;
 using MediatR.Sample.Core.Infrastructure;
 using MediatR.Sample.Core.Persistence;
 using MediatR.Sample.Core.Queries;
@@ -55,6 +56,8 @@ namespace MediatR.Sample
         private static void AddCommandsAndQueries(IServiceCollection services)
         {
             services.AddMediatR(typeof(Startup).Assembly);
+
+            services.AddScoped<IRequestHandler<PingRequest, string>, PongHandler>();
 
             services.AddScoped(typeof(IRequestHandler<,>), typeof(CreateEntityCommand<>.Handler));
             services.AddScoped(typeof(IRequestHandler<,>), typeof(ReadEntityQuery<>.Handler));
